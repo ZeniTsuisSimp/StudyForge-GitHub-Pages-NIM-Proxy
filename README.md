@@ -5,7 +5,7 @@ StudyForge is a static academic AI-tools site. The browser asks for a user's Gem
 ## AI provider
 
 - Provider: Google Gemini API
-- Model: `gemini-3.6-flash` (hardcoded; users do not choose a model)
+- Model: `gemini-3.5-flash-lite` (hardcoded; users do not choose a model)
 - API key: user supplied from Google AI Studio
 - Frontend: GitHub Pages
 - Proxy: Netlify Function

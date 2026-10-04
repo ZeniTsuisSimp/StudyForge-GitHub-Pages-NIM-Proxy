@@ -1,4 +1,4 @@
-const GEMINI_MODEL="gemini-3.6-flash";
+const GEMINI_MODEL="gemini-3.5-flash-lite";
 const AI_PROXY_URL=(window.STUDYFORGE_CONFIG&&window.STUDYFORGE_CONFIG.AI_PROXY_URL)||"https://YOUR-NETLIFY-SITE.netlify.app/.netlify/functions/nim";
 const KEY_STORE="studyforge_gemini_key";
 let pendingTool=null, flashcards=[], flashIndex=0, quizData=[], quizScore=0, slideData=[], slideIndex=0;
