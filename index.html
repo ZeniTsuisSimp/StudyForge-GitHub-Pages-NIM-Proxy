@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>StudyForge — AI Academic Workspace</title>
+<meta name="description" content="Aesthetic AI academic workspace powered by NVIDIA NIM.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="ambient a1"></div><div class="ambient a2"></div>
+<header class="topbar">
+  <a class="brand" href="#"><span class="brandmark">✦</span><span>StudyForge</span></a>
+  <div class="top-actions">
+    <span id="apiStatus" class="status"><i></i> NIM not connected</span>
+    <button class="ghost" id="settingsBtn">NIM Key</button>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="eyebrow">AI ACADEMIC WORKSPACE</div>
+  <h1>Turn study work into<br><span>something smarter.</span></h1>
+  <p>Ten focused AI tools for resumes, notes, presentations, revision, planning and learning — powered by your NVIDIA NIM API key.</p>
+  <div class="hero-actions">
+    <button class="primary" onclick="openTool('notes')">Start creating <span>→</span></button>
+    <button class="secondary" id="connectHero">Connect NIM</button>
+  </div>
+</section>
+
+<section class="tool-grid" id="toolGrid"></section>
+</main>
+
+<div class="modal hidden" id="keyModal" aria-hidden="true">
+ <div class="backdrop" data-close="keyModal"></div>
+ <div class="modal-card">
+   <button class="close" data-close="keyModal">×</button>
+   <div class="modal-icon">⚡</div>
+   <div class="eyebrow">NVIDIA NIM</div>
+   <h2>Connect your API key</h2>
+   <p>Enter your NVIDIA NIM API key to use this tool. You only need to provide the key — the model is configured by StudyForge.</p>
+   <label>NIM API key</label>
+   <div class="key-row"><input id="apiKeyInput" type="password" autocomplete="off" placeholder="nvapi-••••••••••"><button id="toggleKey">Show</button></div>
+   <div id="keyError" class="error"></div>
+   <button class="primary full" id="saveKey">Continue <span>→</span></button>
+   <small>Your key is kept in this browser session and is not included in the site source.</small>
+ </div>
+</div>
+
+<div class="modal hidden" id="toolModal" aria-hidden="true">
+ <div class="backdrop" data-close="toolModal"></div>
+ <div class="tool-window">
+   <div class="tool-head"><div><div id="toolEyebrow" class="eyebrow"></div><h2 id="toolTitle"></h2></div><button class="close" data-close="toolModal">×</button></div>
+   <div id="toolBody"></div>
+ </div>
+</div>
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsPDF@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
