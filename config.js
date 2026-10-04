@@ -3,5 +3,5 @@
 // Example:
 // https://studyforge-nim-proxy.netlify.app/.netlify/functions/nim
 window.STUDYFORGE_CONFIG = {
-  NIM_PROXY_URL: "https://YOUR-NETLIFY-SITE.netlify.app/.netlify/functions/nim"
+  NIM_PROXY_URL: "https://moonlit-starburst-4a2173.netlify.app/.netlify/functions/nim"
 };
