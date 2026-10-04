@@ -78,7 +78,15 @@ async function generateNotes(){const s=$("#nInput").value.trim();if(!s)return to
 function pptUI(){toolShell("AI Presentation Generator","03 / PRESENTATION",`<div class="tool-form"><input id="pTopic" placeholder="Presentation topic"><div class="two"><input id="pCount" type="number" min="3" max="12" value="6" placeholder="Slides"><input id="pAudience" placeholder="Audience / level"></div><button class="primary" onclick="generatePPT()">Generate Slides <span>→</span></button></div><div id="pResult" class="result">Slides will appear here.</div>`)}
 async function generatePPT(){const topic=$("#pTopic").value.trim();if(!topic)return toast("Enter a topic.");$("#pResult").innerHTML=loading();try{const x=await nim([{role:"system",content:"Return ONLY valid JSON with this exact shape: {\"slides\":[{\"title\":\"...\",\"bullets\":[\"...\",\"...\",\"...\"]}]}. Create clear educational presentation content."},{role:"user",content:`Topic: ${topic}\nSlides: ${$("#pCount").value}\nAudience: ${$("#pAudience").value}`}],{max_tokens:5000,json:true});slideData=JSON.parse(x).slides;slideIndex=0;renderSlide();}catch(e){$("#pResult").innerHTML=err(e)}}
 function renderSlide(){const s=slideData[slideIndex];$("#pResult").innerHTML=`<div class="slide"><div class="eyebrow">SLIDE ${slideIndex+1} / ${slideData.length}</div><h3>${escapeHtml(s.title)}</h3><ul>${s.bullets.map(b=>`<li>${escapeHtml(b)}</li>`).join("")}</ul></div><div class="actions"><button class="mini" onclick="slideIndex=Math.max(0,slideIndex-1);renderSlide()">← Previous</button><button class="mini" onclick="slideIndex=Math.min(slideData.length-1,slideIndex+1);renderSlide()">Next →</button><button class="mini" onclick="downloadPPT()">Export PPTX</button></div>`}
-async function downloadPPT(){if(!slideData.length)return;const ppt=new pptxgen();ppt.layout="LAYOUT_WIDE";slideData.forEach(s=>{const sl=ppt.addSlide();sl.background={color:"080C14"};sl.addText(s.title,{x:.7,y:.65,w:11.5,h:.6,fontFace:"Aptos Display",fontSize:27,bold:true,color:"FFFFFF"});sl.addText(s.bullets.map(b=>({text:b,options:{bullet:{indent:16},breakLine:true}})),{x:.9,y:1.6,w:10.8,h:4.6,fontSize:19,color:"D7DFEF",breakLine:false,paraSpaceAfterPt:14})});await ppt.writeFile({fileName:"StudyForge-Presentation.pptx"})}
+async function downloadPPT(){
+ if(!slideData.length)return toast("Generate slides first.");
+ if(typeof window.PptxGenJS!=="function")return toast("PowerPoint export is unavailable. Refresh and try again.");
+ try{
+  const ppt=new window.PptxGenJS();ppt.layout="LAYOUT_WIDE";
+  slideData.forEach(s=>{const sl=ppt.addSlide();sl.background={color:"080C14"};sl.addText(s.title,{x:.7,y:.65,w:11.5,h:.6,fontFace:"Aptos Display",fontSize:27,bold:true,color:"FFFFFF"});sl.addText(s.bullets.map(b=>({text:b,options:{bullet:{indent:16},breakLine:true}})),{x:.9,y:1.6,w:10.8,h:4.6,fontSize:19,color:"D7DFEF",breakLine:false,paraSpaceAfterPt:14})});
+  await ppt.writeFile({fileName:"StudyForge-Presentation.pptx"});toast("Presentation exported.");
+ }catch(e){toast(`Export failed: ${e.message||"unknown error"}`)}
+}
 
 function mindmapUI(){toolShell("Syllabus Mind Map","04 / MIND MAP",`<div class="tool-form"><textarea id="mInput" rows="8" placeholder="Paste your syllabus or topic hierarchy…"></textarea><button class="primary" onclick="generateMindmap()">Generate Mind Map <span>→</span></button></div><div id="mResult" class="result">The generated hierarchy will be visualized here.</div>`)}
 async function generateMindmap(){const s=$("#mInput").value.trim();if(!s)return toast("Paste a syllabus first.");$("#mResult").innerHTML=loading();try{const x=await nim([{role:"system",content:"Return ONLY valid JSON: {\"name\":\"root\",\"children\":[{\"name\":\"topic\",\"children\":[{\"name\":\"subtopic\"}]}]}. Build a concise hierarchy from the supplied syllabus."},{role:"user",content:s}],{max_tokens:4000,json:true});const data=JSON.parse(x);$("#mResult").innerHTML=`<div class="mindmap" id="mindSvg"></div>`;drawMindmap(data)}catch(e){$("#mResult").innerHTML=err(e)}}
@@ -126,8 +134,19 @@ let ocrImage=null;
 function previewOCR(inp){ocrImage=inp.files[0];if(!ocrImage)return;const u=URL.createObjectURL(ocrImage);$("#ocrPreview").innerHTML=`<img class="preview-img" src="${u}" alt="Uploaded notes">`}
 async function runOCR(){if(!ocrImage)return toast("Upload an image first.");$("#ocrResult").innerHTML=loading();try{const r=await Tesseract.recognize(ocrImage,"eng",{logger:m=>{}});const text=r.data.text;$("#ocrResult").innerHTML=`<b>Extracted text</b><div class="ocr">${escapeHtml(text)}</div><hr style="border:0;border-top:1px solid #ffffff0b"><div id="ocrSummary">${loading()}</div>`;const x=await nim([{role:"system",content:"Summarize the OCR text into accurate study key points. Correct obvious OCR noise only when the intended word is clear."},{role:"user",content:text}],{max_tokens:2500});$("#ocrSummary").innerHTML=`<b>AI summary</b>${marked.parse(x)}`}catch(e){$("#ocrResult").innerHTML=err(e)}}
 
-function copyText(t){navigator.clipboard?.writeText(t);toast("Copied")}
-function downloadText(name,text){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type:"text/plain"}));a.download=name;a.click();URL.revokeObjectURL(a.href)}
-function pdfText(title,text){const {jsPDF}=window.jspdf;const doc=new jsPDF();const lines=doc.splitTextToSize(text,180);let y=18;doc.setFontSize(16);doc.text(title,15,y);y+=10;doc.setFontSize(10);for(const line of lines){if(y>280){doc.addPage();y=15}doc.text(line,15,y);y+=5}doc.save(title.replace(/\s+/g,"-")+".pdf")}
+async function copyText(t){try{await navigator.clipboard.writeText(t);toast("Copied")}catch(e){toast("Copy failed. Please copy the text manually.")}}
+function downloadText(name,text){
+ const a=document.createElement("a"),url=URL.createObjectURL(new Blob([text],{type:"text/plain;charset=utf-8"}));
+ a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast("Download started.");
+}
+function pdfText(title,text){
+ if(!window.jspdf?.jsPDF)return toast("PDF export is unavailable. Refresh and try again.");
+ try{
+  const doc=new window.jspdf.jsPDF(),lines=doc.splitTextToSize(text,180);let y=18;
+  doc.setFontSize(16);doc.text(title,15,y);y+=10;doc.setFontSize(10);
+  for(const line of lines){if(y>280){doc.addPage();y=15}doc.text(line,15,y);y+=5}
+  doc.save(title.replace(/\s+/g,"-")+".pdf");toast("PDF exported.");
+ }catch(e){toast(`PDF export failed: ${e.message||"unknown error"}`)}
+}
 $("#saveKey").onclick=saveKey;$("#settingsBtn").onclick=()=>{pendingTool=null;$("#apiKeyInput").value=getKey()||"";show("keyModal")};$("#connectHero").onclick=()=>{$("#apiKeyInput").value=getKey()||"";show("keyModal")};$("#toggleKey").onclick=()=>{$("#apiKeyInput").type=$("#apiKeyInput").type==="password"?"text":"password";$("#toggleKey").textContent=$("#apiKeyInput").type==="password"?"Show":"Hide"};
 renderCards();setStatus();
