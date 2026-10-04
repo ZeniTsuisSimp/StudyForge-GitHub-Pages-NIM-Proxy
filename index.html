@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>StudyForge — AI Academic Workspace</title>
-<meta name="description" content="Aesthetic AI academic workspace powered by NVIDIA NIM.">
+<meta name="description" content="Aesthetic AI academic workspace powered by Gemini.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -24,10 +24,10 @@
 <section class="hero">
   <div class="eyebrow">AI ACADEMIC WORKSPACE</div>
   <h1>Turn study work into<br><span>something smarter.</span></h1>
-  <p>Ten focused AI tools for resumes, notes, presentations, revision, planning and learning — powered by your NVIDIA NIM API key.</p>
+  <p>Ten focused AI tools for resumes, notes, presentations, revision, planning and learning — powered by your Gemini API key.</p>
   <div class="hero-actions">
     <button class="primary" onclick="openTool('notes')">Start creating <span>→</span></button>
-    <button class="secondary" id="connectHero">Connect NIM</button>
+    <button class="secondary" id="connectHero">Connect Gemini</button>
   </div>
 </section>
 
@@ -39,11 +39,11 @@
  <div class="modal-card">
    <button class="close" data-close="keyModal">×</button>
    <div class="modal-icon">⚡</div>
-   <div class="eyebrow">NVIDIA NIM</div>
+   <div class="eyebrow">GEMINI API</div>
    <h2>Connect your API key</h2>
-   <p>Enter your NVIDIA NIM API key to use this tool. You only need to provide the key — the model is configured by StudyForge.</p>
-   <label>NIM API key</label>
-   <div class="key-row"><input id="apiKeyInput" type="password" autocomplete="off" placeholder="nvapi-••••••••••"><button id="toggleKey">Show</button></div>
+   <p>Enter your Gemini API key to use this tool. You only need to provide the key — the model is configured by StudyForge.</p>
+   <label>Gemini API key</label>
+   <div class="key-row"><input id="apiKeyInput" type="password" autocomplete="off" placeholder="Gemini API key"><button id="toggleKey">Show</button></div>
    <div id="keyError" class="error"></div>
    <button class="primary full" id="saveKey">Continue <span>→</span></button>
    <small>Your key is kept in this browser session and is not included in the site source.</small>

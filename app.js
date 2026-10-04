@@ -1,6 +1,6 @@
-const NIM_MODEL="meta/llama-3.3-70b-instruct";
-const NIM_PROXY_URL=(window.STUDYFORGE_CONFIG&&window.STUDYFORGE_CONFIG.NIM_PROXY_URL)||"https://YOUR-NETLIFY-SITE.netlify.app/.netlify/functions/nim";
-const KEY_STORE="studyforge_nim_key";
+const GEMINI_MODEL="gemini-3.6-flash";
+const AI_PROXY_URL=(window.STUDYFORGE_CONFIG&&window.STUDYFORGE_CONFIG.AI_PROXY_URL)||"https://YOUR-NETLIFY-SITE.netlify.app/.netlify/functions/nim";
+const KEY_STORE="studyforge_gemini_key";
 let pendingTool=null, flashcards=[], flashIndex=0, quizData=[], quizScore=0, slideData=[], slideIndex=0;
 
 const tools=[
@@ -23,29 +23,29 @@ function hide(id){$("#"+id).classList.add("hidden");$("#"+id).setAttribute("aria
 document.addEventListener("click",e=>{const b=e.target.closest("[data-close]");if(b)hide(b.dataset.close)});
 
 function getKey(){return sessionStorage.getItem(KEY_STORE)}
-function setStatus(){const ok=!!getKey();$("#apiStatus").classList.toggle("ok",ok);$("#apiStatus").innerHTML=`<i></i> ${ok?"NIM connected":"NIM not connected"}`}
+function setStatus(){const ok=!!getKey();$("#apiStatus").classList.toggle("ok",ok);$("#apiStatus").innerHTML=`<i></i> ${ok?"Gemini connected":"Gemini not connected"}`}
 function requireKey(tool){if(getKey())return true;pendingTool=tool;$("#apiKeyInput").value="";$("#keyError").textContent="";show("keyModal");return false}
 async function saveKey(){
  const key=$("#apiKeyInput").value.trim();
- if(!key){$("#keyError").textContent="Please enter your NVIDIA NIM API key.";return}
- if(!key.startsWith("nvapi-")){$("#keyError").textContent="That doesn't look like an NVIDIA API key. It should normally begin with nvapi-.";return}
+ if(!key){$("#keyError").textContent="Please enter your Gemini API key.";return}
+ if(key.length < 20){$("#keyError").textContent="That doesn't look like a Gemini API key.";return}
  $("#keyError").textContent="Checking key…";
  try{
-   const r=await fetch(NIM_PROXY_URL,{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${key}`},body:JSON.stringify({model:NIM_MODEL,messages:[{role:"user",content:"Reply with exactly OK."}],max_tokens:8,temperature:0,stream:false})});
-   if(!r.ok){let msg="NIM rejected the key.";try{const x=await r.json();msg=x?.error?.message||msg}catch{}throw new Error(msg)}
-   sessionStorage.setItem(KEY_STORE,key);setStatus();hide("keyModal");toast("NVIDIA NIM connected");
+   const r=await fetch(AI_PROXY_URL,{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${key}`},body:JSON.stringify({model:GEMINI_MODEL,messages:[{role:"user",content:"Reply with exactly OK."}],max_tokens:8,temperature:0,stream:false})});
+   if(!r.ok){let msg="Gemini rejected the key.";try{const x=await r.json();msg=x?.error?.message||msg}catch{}throw new Error(msg)}
+   sessionStorage.setItem(KEY_STORE,key);setStatus();hide("keyModal");toast("Gemini connected");
    if(pendingTool){const t=pendingTool;pendingTool=null;openTool(t)}
- }catch(e){$("#keyError").textContent=e.message.includes("Failed to fetch")?"The NIM proxy could not be reached. Check that your Netlify Function is deployed and that NIM_PROXY_URL in config.js is correct.":e.message}
+ }catch(e){$("#keyError").textContent=e.message.includes("Failed to fetch")?"The Gemini proxy could not be reached. Check that your Netlify Function is deployed and that AI_PROXY_URL in config.js is correct.":e.message}
 }
 async function nim(messages,{temperature=.25,max_tokens=3000,json=false}={}){
- const key=getKey();if(!key)throw new Error("NVIDIA NIM API key required.");
- const body={model:NIM_MODEL,messages,max_tokens,temperature,stream:false};
+ const key=getKey();if(!key)throw new Error("Gemini API key required.");
+ const body={model:GEMINI_MODEL,messages,max_tokens,temperature,stream:false};
  if(json)body.response_format={type:"json_object"};
- const r=await fetch(NIM_PROXY_URL,{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${key}`},body:JSON.stringify(body)});
- if(!r.ok){let m=`NIM request failed (${r.status})`;try{const x=await r.json();m=x?.error?.message||m}catch{}throw new Error(m)}
+ const r=await fetch(AI_PROXY_URL,{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${key}`},body:JSON.stringify(body)});
+ if(!r.ok){let m=`Gemini request failed (${r.status})`;try{const x=await r.json();m=x?.error?.message||m}catch{}throw new Error(m)}
  const x=await r.json();return x?.choices?.[0]?.message?.content||"";
 }
-function loading(){return `<div class="loading"><i class="dot"></i> Generating with NVIDIA NIM…</div>`}
+function loading(){return `<div class="loading"><i class="dot"></i> Generating with Gemini…</div>`}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 function toast(s){const x=$("#toast");x.textContent=s;x.classList.add("show");setTimeout(()=>x.classList.remove("show"),2400)}
 function toolShell(title,eyebrow,body){$("#toolEyebrow").textContent=eyebrow;$("#toolTitle").textContent=title;$("#toolBody").innerHTML=body;show("toolModal")}
